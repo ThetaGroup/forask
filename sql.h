@@ -1,0 +1,6 @@
+#define CREATE_AREA_TABLE_SQL "create table area(id integer primary key autoincrement,name varchar(128));"
+#define CREATE_CONFIG_TABLE_SQL "create table config(id integer primary key autoincrement,name varchar(128),attr varchar(128));"
+#define INSERT_CURRENT_AREA_CONFIG_SQL "insert into config (name,attr) values ('current_area',NULL);"
+#define INSERT_AREA_SQL "insert into area (name) values ('%s');"
+#define QUERY_ALL_AREA_SQL "select name from area;"
+#define QUERY_CURRENT_AREA_SQL "select attr from config where name='current_area';"
