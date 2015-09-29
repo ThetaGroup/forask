@@ -14,6 +14,6 @@ int taskAdd(char *title,char *desc);
 
 int taskDone(long taskId);
 
-int taskHelp();
+int help();
 
 

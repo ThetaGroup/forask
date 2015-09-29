@@ -63,7 +63,7 @@ int runClient(int argc,char *argv[]){
 			return taskDone(atol(argv[3]));
 		case CLI_HELP:
 			LOG("Help...\n");
-			return taskHelp();
+			return help();
 		case CLI_ERROR:
 		default:
 			printf("Unrecognized parameters!\n");

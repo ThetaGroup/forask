@@ -191,7 +191,7 @@ int taskDone(long taskId){
 	return 0;
 }
 
-int taskHelp(){
+int help(){
 	return 0;
 }
 
