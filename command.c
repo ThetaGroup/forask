@@ -71,6 +71,7 @@ int areaShow(){
 	char *errMsg;
 	char **dbResult;
 	int nRow,nColumn;
+	
 	int ret=sqlite3_get_table(
 			conn,
 			QUERY_ALL_AREA_SQL,
@@ -87,11 +88,68 @@ int areaShow(){
 	}else{
 		printf("Query all areas failed...\n");
 	}
+
+	ret=sqlite3_get_table(
+			conn,
+			QUERY_CURRENT_AREA_SQL,
+			&dbResult,
+			&nRow,
+			&nColumn,
+			&errMsg
+		);
+	if (ret==SQLITE_OK){
+		if (dbResult[1]==NULL){
+			printf("No selected area.\n");
+		}else{
+			printf("Selected area:%s\n",dbResult[1]);
+		}
+	}
+
+
 	closeDb();
 	return 0;
 }
 
 int areaSwitch(char *area){
+	openDb();
+	char **dbResult;
+	int nRow,nColumn;
+	char *errMsg;
+	char *selectSql=(char*)malloc(1024);
+	sprintf(selectSql,QUERY_CERTAIN_AREA_SQL,area);
+	int ret=sqlite3_get_table(
+			conn,
+			selectSql,
+			&dbResult,
+			&nRow,
+			&nColumn,
+			&errMsg
+		);
+	if (ret!=SQLITE_OK){
+		LOG("%s\n",errMsg);
+	}else{
+		if (nRow<1){
+			printf("No such area.\n");
+		}else{
+			char *updateSql=(char*)malloc(1024);
+			sprintf(updateSql,UPDATE_SWITHCED_AREA_SQL,dbResult[1]);
+			ret=sqlite3_exec(
+					conn,
+					updateSql,
+					NULL,
+					NULL,
+					&errMsg
+				);
+			if (ret!=SQLITE_OK){
+				LOG("%s\n",errMsg);
+			}else{
+				printf("Current arear swithced to %s.\n",area);
+			}
+			free(updateSql);
+		}
+	}
+	free(selectSql);
+	closeDb();
 	return 0;
 }
 
@@ -107,8 +165,11 @@ int areaAdd(char *area){
 			NULL,
 			&errMsg
 		);
-	if (ret!=SQLITE_OK)
+	if (ret!=SQLITE_OK){
 		LOG("%s\n",errMsg);
+	}else{
+		printf("Area %s added.\n",area);
+	}
 	free(insertSql);
 	closeDb();
 	return 0;

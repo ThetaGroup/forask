@@ -3,4 +3,6 @@
 #define INSERT_CURRENT_AREA_CONFIG_SQL "insert into config (name,attr) values ('current_area',NULL);"
 #define INSERT_AREA_SQL "insert into area (name) values ('%s');"
 #define QUERY_ALL_AREA_SQL "select name from area;"
-#define QUERY_CURRENT_AREA_SQL "select attr from config where name='current_area';"
+#define QUERY_CURRENT_AREA_SQL "select area.name from config left join area on config.attr=area.id where config.name='current_area';"
+#define QUERY_CERTAIN_AREA_SQL "select id from area where name='%s';"
+#define UPDATE_SWITHCED_AREA_SQL "update config set attr='%s' where name='current_area';"
