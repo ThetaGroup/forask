@@ -1,4 +1,4 @@
-#define DB_FILE "forask.db"
+#define DB_FILE "/etc/forask/forask.db"
 #define TASK_STATE_ACTIVE "00"
 #define TASK_STATE_DONE "50"
 #define TASK_STATE_ACTIVE_STRING "ACTIVE"
@@ -193,11 +193,29 @@ int taskShow(){
 	char *errMsg;
 	char **dbResult;
 	int nRow,nColumn;
+	long currentAreaId;
 	
-	char *selectSql=(char*)malloc(1024);
-	sprintf(selectSql,QUERY_TASK_BY_STATE_SQL,TASK_STATE_ACTIVE);
-
 	int ret=sqlite3_get_table(
+			conn,
+			QUERY_CURRENT_AREA_ID_SQL,
+			&dbResult,
+			&nRow,
+			&nColumn,
+			&errMsg
+		);
+	if (ret==SQLITE_OK){
+		currentAreaId=atol(dbResult[1]);
+		printf("Current area is %ld...\n",currentAreaId);
+	}else{
+		printf("Query current area failed...\n");
+		closeDb();
+		return -1;
+	}
+
+	char *selectSql=(char*)malloc(1024);
+	sprintf(selectSql,QUERY_TASK_BY_STATE_SQL,TASK_STATE_ACTIVE,currentAreaId);
+
+	ret=sqlite3_get_table(
 			conn,
 			selectSql,
 			&dbResult,
@@ -213,6 +231,8 @@ int taskShow(){
 		}
 	}else{
 		printf("Query tasks to do failed...\n");
+		closeDb();
+		return -1;
 	}
 
 	closeDb();
@@ -266,8 +286,31 @@ int taskAdd(char *title,char *desc){
 	openDb();
 	char *errMsg;
 	char *insertSql=(char*)malloc(1024);
-	sprintf(insertSql,INSERT_TASK_SQL,title,desc,TASK_STATE_ACTIVE);	
-	int	ret=sqlite3_exec(
+
+	char **dbResult;
+	int nRow,nColumn;
+	long currentAreaId;	
+
+	int ret=sqlite3_get_table(
+			conn,
+			QUERY_CURRENT_AREA_ID_SQL,
+			&dbResult,
+			&nRow,
+			&nColumn,
+			&errMsg
+		);
+
+	if (ret==SQLITE_OK){
+		currentAreaId=atol(dbResult[1]);
+		printf("Current area is %ld...\n",currentAreaId);
+	}else{
+		printf("Query current area failed...\n");
+		closeDb();
+		return -1;
+	}
+
+	sprintf(insertSql,INSERT_TASK_SQL,title,desc,TASK_STATE_ACTIVE,currentAreaId);	
+	ret=sqlite3_exec(
 			conn,
 			insertSql,
 			NULL,
