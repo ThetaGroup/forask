@@ -1,4 +1,8 @@
 #define DB_FILE "forask.db"
+#define TASK_STATE_ACTIVE "00"
+#define TASK_STATE_DONE "50"
+#define TASK_STATE_ACTIVE_STRING "ACTIVE"
+#define TASK_STATE_DONE_STRING "DONE"
 
 #include <stdio.h>
 #include <string.h>
@@ -46,6 +50,15 @@ void openDb(){
 			NULL,
 			&errMsg
 		);
+		if (ret!=SQLITE_OK)
+			LOG("%s\n",errMsg);
+		ret=sqlite3_exec(
+			conn,
+			CREATE_TASK_TABLE_SQL,
+			NULL,
+			NULL,
+			&errMsg
+			);
 		if (ret!=SQLITE_OK)
 			LOG("%s\n",errMsg);
 	}
@@ -176,18 +189,121 @@ int areaAdd(char *area){
 }
 
 int taskShow(){
+	openDb();
+	char *errMsg;
+	char **dbResult;
+	int nRow,nColumn;
+	
+	char *selectSql=(char*)malloc(1024);
+	sprintf(selectSql,QUERY_TASK_BY_STATE_SQL,TASK_STATE_ACTIVE);
+
+	int ret=sqlite3_get_table(
+			conn,
+			selectSql,
+			&dbResult,
+			&nRow,
+			&nColumn,
+			&errMsg
+		);
+	if (ret==SQLITE_OK){
+		printf("%d tasks to do in total:\n",nRow);
+		for (int i=0;i<nRow;i++){
+			int startPos=(i+1)*nColumn;
+			printf("%s\t%s\n",dbResult[startPos],dbResult[startPos+1]);
+		}
+	}else{
+		printf("Query tasks to do failed...\n");
+	}
+
+	closeDb();
 	return 0;
 }
 
 int taskShowId(long taskId){
+	openDb();
+	char *errMsg;
+	char **dbResult;
+	int nRow,nColumn;
+	
+	char *selectSql=(char*)malloc(1024);
+	sprintf(selectSql,QUERY_TASK_BY_ID_SQL,taskId);
+
+	int ret=sqlite3_get_table(
+			conn,
+			selectSql,
+			&dbResult,
+			&nRow,
+			&nColumn,
+			&errMsg
+		);
+	if (ret==SQLITE_OK){
+		if (nRow<1){
+			printf("No such task with the given id!");
+		}else{
+			printf("Id:%ld\n",taskId);
+			printf("Title:%s\n",dbResult[nColumn]);
+			printf("Content:%s\n",dbResult[nColumn+1]);
+			char *stateCode=dbResult[nColumn+2];
+			char *stateString=NULL;
+			if (strcmp(stateCode,TASK_STATE_ACTIVE)==0){
+				stateString=TASK_STATE_ACTIVE_STRING;
+			}else if (strcmp(stateCode,TASK_STATE_DONE)){
+				stateString=TASK_STATE_DONE_STRING;
+			}else
+				LOG("Unrecognized task state code:%s\n",stateCode);
+			if (stateString!=NULL)
+				printf("State:%s\n",stateString);
+		}
+	}else{
+		printf("Query task failed...\n");
+	}
+
+	closeDb();
 	return 0;
 }
 
 int taskAdd(char *title,char *desc){
+	openDb();
+	char *errMsg;
+	char *insertSql=(char*)malloc(1024);
+	sprintf(insertSql,INSERT_TASK_SQL,title,desc,TASK_STATE_ACTIVE);	
+	int	ret=sqlite3_exec(
+			conn,
+			insertSql,
+			NULL,
+			NULL,
+			&errMsg
+		);
+	if (ret!=SQLITE_OK){
+		LOG("%s\n",errMsg);
+	}else{
+		printf("Task %s added and its initial state is ACTIVE.\n",title);
+	}
+	free(insertSql);
+	closeDb();
+
 	return 0;
 }
 
 int taskDone(long taskId){
+	openDb();
+	char *errMsg;
+	char *updateSql=(char*)malloc(1024);
+	sprintf(updateSql,UPDATE_TASK_STATE_SQL,TASK_STATE_DONE,taskId);
+	int ret=sqlite3_exec(
+			conn,
+			updateSql,
+			NULL,
+			NULL,
+			&errMsg
+		);
+	if (ret!=SQLITE_OK){
+		LOG("%s\n",errMsg);
+	}else{
+		printf("Task %ld has been done.\n",taskId);
+	}
+	closeDb();
+	free(updateSql);
 	return 0;
 }
 
