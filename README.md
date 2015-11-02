@@ -23,7 +23,7 @@ Theta Task -> 2Task -> 3Task -> 4Task -> Forask
 ----
 ## Data
 
-Export forask.db file with any sqlite client.Here we ignore the details of tables & datas in,check it yourself.
+Export forask.db file using any sqlite client.Here we ignore the details of tables & datas within,check it yourself.
 
-***For now,I hard code the db-file's location in /etc/forask.db(in Unix-Family).This should be changed in later versions.***
+***For now,I hard code the db-file's location in /etc/forask.db(in Unix-Family).This should be fixed in later versions.***
 
