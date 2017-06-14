@@ -30,3 +30,11 @@
 
 # Debug files
 *.dSYM/
+
+# My makefile
+/bin/*
+/obj/*
+.settings
+.project
+.cproject
+
