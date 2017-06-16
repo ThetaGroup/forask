@@ -14,7 +14,7 @@ RMF = rm -rvf
 MD = mkdir -p
 
 forask:$(OBJS) obj_bin
-	$(CC) $(OBJS) -o $(DIR_BIN)/forask
+	$(CC) $(OBJS) -o $(DIR_BIN)/forask -lpthread -ldl
 
 $(DIR_OBJ)/sqlite3.o : $(DIR_SRC)/sqlite3.c obj_dir
 	$(CCF) -c $(DIR_SRC)/sqlite3.c -o $(DIR_OBJ)/sqlite3.o
